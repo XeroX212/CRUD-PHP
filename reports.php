@@ -10,6 +10,7 @@ if (!empty($_GET['filter'])) {
 }
 
 include 'inc/header.php';
+
 ?>
 <div class="col-container page-container">
     <div class="col col-70-md col-60-lg col-center">
