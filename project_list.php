@@ -4,6 +4,22 @@ require 'inc/functions.php';
 $page = "projects";
 $pageTitle = "Project List | Time Tracker";
 
+if (isset($_POST['delete'])) {
+    # code...
+    if (delete_project(filter_input(INPUT_POST, 'delete', FILTER_SANITIZE_NUMBER_INT))) {
+        header('location: project_list.php?msg=Project+Deleted');
+        exit;
+    } else {
+        header('location: project_list.php?msg=Unable+to+Delete+Project');
+        exit;
+    }
+}
+if (isset($_GET['msg'])) {
+    # code...
+    $error_message = trim(filter_input(INPUT_GET, 'msg', FILTER_SANITIZE_STRING));
+}
+
+
 include 'inc/header.php';
 ?>
 <div class="section catalog random">
@@ -19,7 +35,12 @@ include 'inc/header.php';
                 Add Project
                 </a>
             </div>
-
+            
+            <?php 
+            if (isset($error_message)) {
+                echo "<p class=\"message\">$error_message</p>";
+            }
+            ?>
             <div class="form-container">
                 <ul class="items">
                     <?php
@@ -27,7 +48,13 @@ include 'inc/header.php';
                     $project_list = get_project_list();
        
                     foreach($project_list as $item) {
-                        echo "<li>" . $item['title'] . "</li>";
+                        echo "<li><a href='project.php?id=" . $item['project_id'] . "'>" . $item['title'] . "</a>";
+                
+                        echo "<form method='post' action='project_list.php'>\n";
+                        echo "<input type='hidden' value='".$item['project_id'] ."' name='delete' />\n";
+                        echo "<input type='submit' class='button--delete' value='Delete' onclick=\"return confirm('Are you sure want to delete this task?');\"/>\n";
+                        echo "</form>";
+                        echo "</li>";
                     }
                     ?>
                 </ul>

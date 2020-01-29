@@ -54,15 +54,24 @@ function get_task_list($filter = null) {
     return $results->fetchAll(PDO::FETCH_ASSOC);
 }
 
-function add_project($title, $category) {
+function add_project($title, $category, $project_id = null) {
     include 'connection.php';
 
-    $sql = 'INSERT INTO projects(title, category) VALUES(?, ?)';
+    if ($project_id) {
+        # code...
+        $sql = 'UPDATE projects SET title = ?, category = ? WHERE project_id = ?';
+    } else {
+        $sql = 'INSERT INTO projects(title, category) VALUES(?, ?)';
+    }
 
     try {
         $results = $db->prepare($sql);
-        $results->bindParam(1, $title, PDO::PARAM_STR);
-        $results->bindParam(2, $category, PDO::PARAM_STR);
+        $results->bindValue(1, $title, PDO::PARAM_STR);
+        $results->bindValue(2, $category, PDO::PARAM_STR);
+        if ($project_id) {
+            # code...
+            $results->bindValue(3, $project_id, PDO::PARAM_INT);
+        }
         $results->execute();
     } catch (Exception $e) {
         echo "ERROR!: " . $e->getMessage() . "<br />";
@@ -86,17 +95,80 @@ function get_project($project_id) {
     return $results->fetch();
 }
 
-function add_task($project_id, $title, $date, $time) {
+function get_task($task_id) {
     include 'connection.php';
 
-    $sql = 'INSERT INTO tasks(project_id, title, date, time) VALUES(?, ?, ?, ?)';
+    $sql = 'SELECT task_id, title, date, time, project_id FROM tasks WHERE task_id = ?';
+
+    try {
+        $results = $db->prepare($sql);
+        $results->bindParam(1, $task_id, PDO::PARAM_INT);
+        $results->execute();
+    } catch (Exception $e) {
+        echo "ERROR!: " . $e->getMessage() . "<br />";
+        return false;
+    }
+    return $results->fetch();
+}
+
+function delete_task($task_id) {
+    include 'connection.php';
+
+    $sql = 'DELETE FROM tasks WHERE task_id = ?';
+
+    try {
+        $results = $db->prepare($sql);
+        $results->bindParam(1, $task_id, PDO::PARAM_INT);
+        $results->execute();
+    } catch (Exception $e) {
+        echo "ERROR!: " . $e->getMessage() . "<br />";
+        return false;
+    }
+    return true;
+}
+
+function delete_project($project_id) {
+    include 'connection.php';
+
+    $sql = 'DELETE FROM projects WHERE project_id = ?'
+        .' AND project_id NOT IN (SELECT project_id FROM tasks)';
 
     try {
         $results = $db->prepare($sql);
         $results->bindParam(1, $project_id, PDO::PARAM_INT);
-        $results->bindParam(2, $title, PDO::PARAM_STR);
-        $results->bindParam(3, $date, PDO::PARAM_STR);
-        $results->bindParam(4, $time, PDO::PARAM_INT);
+        $results->execute();
+    } catch (Exception $e) {
+        echo "ERROR!: " . $e->getMessage() . "<br />";
+        return false;
+    }
+    if ($results->rowCount() > 0) {
+        # code...
+        return true;
+    } else {
+        return false;
+    }
+}
+
+function add_task($project_id, $title, $date, $time, $task_id = null) {
+    include 'connection.php';
+
+    if ($task_id) {
+        # code...
+        $sql = 'UPDATE tasks SET project_id = ?, title = ?, date = ?, time = ? '
+            . ' WHERE task_id = ?';
+    } else {
+        $sql = 'INSERT INTO tasks(project_id, title, date, time) VALUES(?, ?, ?, ?)';
+    }
+    try {
+        $results = $db->prepare($sql);
+        $results->bindValue(1, $project_id, PDO::PARAM_INT);
+        $results->bindValue(2, $title, PDO::PARAM_STR);
+        $results->bindValue(3, $date, PDO::PARAM_STR);
+        $results->bindValue(4, $time, PDO::PARAM_INT);
+        if ($task_id) {
+            # code...
+            $results->bindValue(5, $task_id, PDO::PARAM_INT) ;
+        }
         $results->execute();
     } catch (Exception $e) {
         echo "ERROR!: " . $e->getMessage() . "<br />";

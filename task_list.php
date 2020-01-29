@@ -4,6 +4,22 @@ require 'inc/functions.php';
 $page = "tasks";
 $pageTitle = "Task List | Time Tracker";
 
+if (isset($_POST['delete'])) {
+    # code...
+    if (delete_task(filter_input(INPUT_POST, 'delete', FILTER_SANITIZE_NUMBER_INT))) {
+        header('location: task_list.php?msg=Task+Deleted');
+        exit;
+    } else {
+        header('location: task_list.php?msg=Unable+to+Delete+Task');
+        exit;
+    }
+}
+
+if (isset($_GET['msg'])) {
+    # code...
+    $error_message = trim(filter_input(INPUT_GET, 'msg', FILTER_SANITIZE_STRING));
+}
+
 include 'inc/header.php';
 ?>
 <div class="section catalog random">
@@ -19,6 +35,14 @@ include 'inc/header.php';
                     </span>
                 Add Task</a>
             </div>
+            
+            <?php 
+            
+            if (isset($error_message)) {
+                echo "<p class=\"message\">$error_message</p>";
+            }
+            
+            ?>
 
             <div class="form-container">
               <ul class="items">
@@ -26,7 +50,13 @@ include 'inc/header.php';
             $task_list = get_task_list();
             
             foreach($task_list as $item) {
-                echo "<li>" . $item['title'] . "</li>";
+                echo "<li><a href='task.php?id=".$item['task_id']."'>" . $item['title'] . "</a>";
+                
+                echo "<form method='post' action='task_list.php'>\n";
+                echo "<input type='hidden' value='".$item['task_id'] ."' name='delete' />\n";
+                echo "<input type='submit' class='button--delete' value='Delete' onclick=\"return confirm('Are you sure want to delete this task?');\"/>\n";
+                echo "</form>";
+                echo "</li>";
             }
             ?>
               </ul>
