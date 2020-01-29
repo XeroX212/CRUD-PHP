@@ -20,12 +20,44 @@ include 'inc/header.php';
                 <label for='filter'>Filter:</label>
                 <select name="filter" id="filter">
                 <option value="">Select One</option>
+                <optgroup label="Project">
                 <?php
                     foreach(get_project_list() as $item) {
                         echo '<option value="project:'. $item['project_id'].'">';
                         echo $item['title'] ."</option>\n";
                     }
                 ?>
+                </optgroup>
+                <optgroup label='Category'>
+                    <option value="category:Billable">Billable</option>
+                    <option value="category:Charity">Charity</option>
+                    <option value="category:Personal">Personal</option>
+                </optgroup>
+                <optgroup label='Date'>
+                    <option value="date:<?php
+                    echo date('m/d/Y',strtotime('-2 Sunday'));
+                    echo ':';
+                    echo date('m/d/Y', strtotime('-1 Saturday'));
+                    ?>">Last Week</option>
+
+                    <option value="date:<?php
+                    echo date('m/d/Y',strtotime('-1 Sunday'));
+                    echo ':';
+                    echo date('m/d/Y');
+                    ?>">This Week</option>
+                    
+                    <option value="date:<?php
+                    echo date('m/d/Y',strtotime('first day of last month'));
+                    echo ':';
+                    echo date('m/d/Y', strtotime('last day of last month'));
+                    ?>">Last Month</option>
+                    
+                    <option value="date:<?php
+                    echo date('m/d/Y',strtotime('first day of this month'));
+                    echo ':';
+                    echo date('m/d/Y');
+                    ?>">This Month</option>
+                </optgroup>
                 </select>
                 <input class="button" type="submit" value="Run" />
             </form>
